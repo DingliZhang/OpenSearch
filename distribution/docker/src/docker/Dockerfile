@@ -30,6 +30,7 @@ RUN set -eux ; \\
     tini_bin="" ; \\
     case "\$(arch)" in \\
         aarch64) tini_bin='tini-arm64' ;; \\
+        riscv64) tini_bin='tini-riscv64' ;; \\
         x86_64)  tini_bin='tini-amd64' ;; \\
         *) echo >&2 ; echo >&2 "Unsupported architecture \$(arch)" ; echo >&2 ; exit 1 ;; \\
     esac ; \\
