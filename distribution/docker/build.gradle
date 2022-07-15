@@ -27,11 +27,13 @@ testFixtures.useFixture()
 
 configurations {
   arm64DockerSource
+  riscv64DockerSource
   dockerSource
 }
 
 dependencies {
   arm64DockerSource project(path: ":distribution:archives:linux-arm64-tar", configuration:"default")
+  riscv64DockerSource project(path: ":distribution:archives:linux-riscv64-tar", configuration:"default")
   dockerSource project(path: ":distribution:archives:linux-tar", configuration:"default")
 }
 
@@ -40,9 +42,11 @@ ext.expansions = { Architecture architecture, DockerBase base, boolean local ->
   if (local) {
     if (architecture == Architecture.ARM64) {
       classifier = "linux-arm64"
+    } else if (architecture == Architecture.RISCV64) {
+      classifier = "linux-riscv64"
     } else if (architecture == Architecture.X64) {
       classifier = "linux-x64"
-    } else {
+    }else {
       throw new IllegalArgumentException("Unsupported architecture [" + architecture + "]")
     }
   } else {
@@ -84,13 +88,13 @@ RUN curl --retry 8 -S -L \\
 
 private static String buildPath(Architecture architecture, DockerBase base) {
   return 'build/' +
-    (architecture == Architecture.ARM64 ? 'arm64-' : '') +
+    (architecture == Architecture.ARM64 ? 'arm64-' : (architecture == Architecture.RISCV64 ? 'riscv64-' : '')) +
     'docker'
 }
 
 private static String taskName(String prefix, Architecture architecture, DockerBase base, String suffix) {
   return prefix +
-    (architecture == Architecture.ARM64 ? 'Arm64' : '') +
+    (architecture == Architecture.ARM64 ? 'Arm64' : (architecture == Architecture.RISCV64 ? 'Riscv64' : '')) +
     suffix
 }
 
@@ -127,6 +131,8 @@ void addCopyDockerContextTask(Architecture architecture, DockerBase base) {
 
     if (architecture == Architecture.ARM64) {
       from configurations.arm64DockerSource
+    } else if(architecture == Architecture.RISCV64) {
+      from configurations.riscv64DockerSource
     } else {
       from configurations.dockerSource
     }
@@ -144,7 +150,7 @@ def createAndSetWritable(Object... locations) {
 
 opensearch_distributions {
   Architecture.values().each { eachArchitecture ->
-    "docker${ eachArchitecture == Architecture.ARM64 ? '_arm64' : '' }" {
+    "docker${ eachArchitecture == Architecture.ARM64 ? '_arm64' : (architecture == Architecture.RISCV64 ? '_riscv64' : '') }" {
       architecture = eachArchitecture
       type = 'docker'
       version = VersionProperties.getOpenSearch()
@@ -156,8 +162,8 @@ opensearch_distributions {
 tasks.named("preProcessFixture").configure {
   dependsOn opensearch_distributions.docker
   // always run the task, otherwise the folders won't be created
-  outputs.upToDateWhen { 
-    false 
+  outputs.upToDateWhen {
+    false
   }
   doLast {
     // tests expect to have an empty repo
@@ -231,10 +237,10 @@ subprojects { Project subProject ->
   if (subProject.name.endsWith('-export')) {
     apply plugin: 'distribution'
 
-    final Architecture architecture = subProject.name.contains('arm64-') ? Architecture.ARM64 : Architecture.X64
+    final Architecture architecture = subProject.name.contains('arm64-') ? Architecture.ARM64 : (subProject.name.contains('riscv64-') ? Architecture.RISCV64 : Architecture.X64)
     final DockerBase base = DockerBase.CENTOS
 
-    final String arch = architecture == Architecture.ARM64 ? '-arm64' : ''
+    final String arch = architecture == Architecture.ARM64 ? '-arm64' : (architecture == Architecture.RISCV64 ? '-riscv64' : '')
     final String extension = 'docker.tar'
     final String artifactName = "opensearch${arch}_test"
 

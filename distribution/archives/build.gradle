@@ -137,6 +137,13 @@ distribution_archives {
     }
   }
 
+  linuxRiscv64Tar {
+    archiveClassifier = 'linux-riscv64'
+    content {
+      archiveFiles(modulesFiles('linux-riscv64'), 'tar', 'linux', 'riscv64', true)
+    }
+  }
+
   linuxTar {
     archiveClassifier = 'linux-x64'
     content {

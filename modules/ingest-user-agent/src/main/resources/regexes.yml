@@ -1093,8 +1093,8 @@ os_parsers:
   # Note, this needs to come before the windows parsers as the app doesn't
   # properly identify as Chrome OS
   #
-  # ex: Mozilla/5.0 (X11; Windows arm64 10718.88.2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.118 Safari/537.36 CitrixChromeApp
-  - regex: '(x64|arm64)\ (\d+)\.(\d+)\.(\d+).*Chrome.*(?:CitrixChromeApp)$'
+  # ex: Mozilla/5.0 (X11; Windows arm64 riscv64 10718.88.2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.118 Safari/537.36 CitrixChromeApp
+  - regex: '(x64|arm64|riscv64)\ (\d+)\.(\d+)\.(\d+).*Chrome.*(?:CitrixChromeApp)$'
     os_replacement: 'Chrome OS'
 
   ##########

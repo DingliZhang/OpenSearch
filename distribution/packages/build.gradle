@@ -115,6 +115,8 @@ Closure commonPackageConfig(String type, boolean jdk, String architecture) {
     if (type == 'deb') {
       if (architecture == 'x64') {
         arch('amd64')
+      } else if(architecture == 'riscv64'){
+        arch('riscv64')
       } else {
         assert architecture == 'arm64' : architecture
         arch('arm64')
@@ -123,6 +125,8 @@ Closure commonPackageConfig(String type, boolean jdk, String architecture) {
       assert type == 'rpm' : type
       if (architecture == 'x64') {
         arch('x86_64')
+      } else if(architecture == 'riscv64'){
+        arch('riscv64')
       } else {
         assert architecture == 'arm64' : architecture
         arch('aarch64')
@@ -130,7 +134,7 @@ Closure commonPackageConfig(String type, boolean jdk, String architecture) {
     }
     // Follow opensearch's file naming convention
     String jdkString = jdk ? "" : "-no-jdk"
-    String prefix = "${architecture == 'arm64' ? 'arm64-' : ''}${jdk ? '' : 'no-jdk-'}${type}"
+    String prefix = "${architecture == 'arm64' ? 'arm64-' : ('riscv64' ? 'riscv64-' : '')}${jdk ? '' : 'no-jdk-'}${type}"
     destinationDirectory = file("${prefix}/build/distributions")
 
     // SystemPackagingTask overrides default archive task convention mappings, but doesn't provide a setter so we have to override the convention mapping itself
@@ -350,6 +354,10 @@ tasks.register('buildArm64Deb', Deb) {
   configure(commonDebConfig(true, 'arm64'))
 }
 
+tasks.register('buildRiscv64Deb', Deb) {
+  configure(commonDebConfig(true, 'riscv64'))
+}
+
 tasks.register('buildDeb', Deb) {
   configure(commonDebConfig(true, 'x64'))
 }
@@ -385,6 +393,10 @@ Closure commonRpmConfig(boolean jdk, String architecture) {
 
 tasks.register('buildArm64Rpm', Rpm) {
   configure(commonRpmConfig(true, 'arm64'))
+}
+
+tasks.register('buildRiscv64Rpm', Rpm) {
+  configure(commonRpmConfig(true, 'riscv64'))
 }
 
 tasks.register('buildRpm', Rpm) {
